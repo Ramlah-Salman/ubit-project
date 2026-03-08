@@ -11,7 +11,6 @@ import {
   Clock,
   MapPin,
   User as UserIcon,
-  X,
   Download,
 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
@@ -22,9 +21,11 @@ type Tab = 'dashboard' | 'timetable' | 'announcements' | 'resources';
 export default function StudentDashboard() {
   const navigate = useNavigate();
   const { user, logout, timetable, announcements, resources, selectedProgram, selectedField } = useApp();
+
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 1024);
 
+  // Responsive sidebar handler
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 1024) setSidebarOpen(false);
@@ -50,48 +51,50 @@ export default function StudentDashboard() {
     { id: 'resources', label: 'Resources', icon: BookOpen },
   ];
 
-  const handleTabChange = (id: Tab) => {
-    setActiveTab(id);
+  const handleTabChange = (tab: Tab) => {
+    setActiveTab(tab);
     if (window.innerWidth < 1024) setSidebarOpen(false);
   };
 
-  const filteredAnnouncements = announcements.filter((a) => {
-    const matchesProgram = !a.program || a.program === selectedProgram;
-    const matchesField = !a.field || a.field === selectedField;
-    return matchesProgram && matchesField;
-  });
-
-  const filteredResources = resources.filter((r) => {
-    const matchesProgram = !r.program || r.program === selectedProgram;
-    const matchesField = !r.field || r.field === selectedField;
-    return matchesProgram && matchesField;
-  });
+  // Filtered announcements and resources based on program & field
+  const filteredAnnouncements = announcements.filter(
+    (a) => (!a.program || a.program === selectedProgram) && (!a.field || a.field === selectedField)
+  );
+  const filteredResources = resources.filter(
+    (r) => (!r.program || r.program === selectedProgram) && (!r.field || r.field === selectedField)
+  );
 
   return (
-    <div className="min-h-screen bg-white flex relative overflow-hidden">
+    <div className="min-h-screen bg-[#FBF9F6] flex relative overflow-hidden">
       {/* MOBILE BACKDROP */}
       {sidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-[#1A2F23]/40 z-40 lg:hidden backdrop-blur-sm transition-opacity"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
-      {/* SIDEBAR - Emerald Theme */}
+      {/* SIDEBAR */}
       <aside
         className={`fixed lg:relative z-50 h-screen bg-[#1A2F23] border-r border-emerald-900/10 transition-all duration-300 ease-in-out flex-shrink-0 ${
           sidebarOpen ? 'w-64 translate-x-0' : 'w-20 -translate-x-full lg:translate-x-0'
         }`}
       >
         <div className="h-full flex flex-col">
-          {/* Logo Section */}
-          <div className={`h-16 px-6 border-b border-white/10 flex items-center ${sidebarOpen ? 'justify-between' : 'justify-center'}`}>
+          {/* Logo */}
+          <div
+            className={`h-16 px-6 border-b border-white/10 flex items-center ${
+              sidebarOpen ? 'justify-between' : 'justify-center'
+            }`}
+          >
             <Link to="/" className="flex items-center gap-3 overflow-hidden">
               <div className="w-8 h-8 rounded bg-emerald-500 flex items-center justify-center flex-shrink-0 shadow-lg shadow-emerald-500/20">
                 <span className="text-white font-serif font-bold text-sm">U</span>
               </div>
               {sidebarOpen && (
-                <h1 className="font-serif font-bold text-emerald-50 text-sm tracking-tight whitespace-nowrap">UBIT Portal</h1>
+                <h1 className="font-serif font-bold text-emerald-50 text-sm tracking-tight whitespace-nowrap">
+                  UBIT Portal
+                </h1>
               )}
             </Link>
           </div>
@@ -120,7 +123,7 @@ export default function StudentDashboard() {
             })}
           </nav>
 
-          {/* User Footer */}
+          {/* Logout */}
           <div className="p-4 border-t border-white/5 bg-black/10">
             <button
               onClick={handleLogout}
@@ -135,13 +138,16 @@ export default function StudentDashboard() {
         </div>
       </aside>
 
-      {/* MAIN VIEW */}
+      {/* MAIN CONTENT */}
       <main className="flex-1 min-h-screen min-w-0 flex flex-col bg-[#FBF9F6]">
         {/* HEADER */}
         <header className="h-16 sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-emerald-900/5 px-4 sm:px-8">
           <div className="h-full flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2 text-emerald-900/40 hover:text-emerald-900 transition-colors">
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="p-2 text-emerald-900/40 hover:text-emerald-900 transition-colors"
+              >
                 <Menu className="w-5 h-5" />
               </button>
               <div>
@@ -154,7 +160,11 @@ export default function StudentDashboard() {
 
             <div className="flex items-center gap-4">
               <div className="hidden md:flex gap-2">
-                <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-tighter ${user.program === 'morning' ? 'bg-amber-100 text-amber-700' : 'bg-indigo-100 text-indigo-700'}`}>
+                <span
+                  className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-tighter ${
+                    user.program === 'morning' ? 'bg-amber-100 text-amber-700' : 'bg-indigo-100 text-indigo-700'
+                  }`}
+                >
                   {user.program}
                 </span>
                 <span className="px-2 py-0.5 rounded bg-emerald-900 text-white text-[10px] font-black uppercase tracking-tighter">
@@ -190,44 +200,57 @@ export default function StudentDashboard() {
   );
 }
 
-// --- SUB-COMPONENTS (Refined to match Programs theme) ---
+// --- SUBCOMPONENTS ---
 
-function DashboardContent({ user, timetable, announcements, onNavigate }: any) {
+function DashboardContent({ user, timetable, announcements, resources, onNavigate }: any) {
   const todayClasses = timetable.slice(0, 3);
+  const recentAnnouncements = announcements.slice(0, 3);
+
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      {/* Welcome Card */}
       <div className="p-10 rounded-[2rem] bg-[#F5F2ED] border border-emerald-900/5 relative overflow-hidden">
         <div className="absolute top-0 right-0 p-8 opacity-10">
           <LayoutDashboard className="w-32 h-32 text-emerald-900" />
         </div>
         <div className="relative z-10">
           <h2 className="text-4xl font-serif font-bold text-[#1A2F23] mb-2">
-            Good Day, {user.name.split(' ')[0]}
+            Good Day, {user.name}
           </h2>
           <p className="text-emerald-900/50 font-medium">Your academic overview for today.</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Classes Card */}
+        {/* Today's Classes */}
         <section className="bg-white rounded-3xl border border-emerald-900/5 p-8 shadow-sm">
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-[10px] font-black uppercase tracking-widest text-emerald-900/30">Schedule Overview</h3>
-            <button onClick={() => onNavigate('timetable')} className="text-[10px] font-black uppercase tracking-widest text-emerald-900 hover:text-emerald-600 flex items-center gap-1 transition-colors">
+            <button
+              onClick={() => onNavigate('timetable')}
+              className="text-[10px] font-black uppercase tracking-widest text-emerald-900 hover:text-emerald-600 flex items-center gap-1 transition-colors"
+            >
               Full Timetable <ChevronRight className="w-3 h-3" />
             </button>
           </div>
           <div className="space-y-4">
             {todayClasses.map((cls: any) => (
-              <div key={cls.id} className="flex items-center gap-5 p-5 rounded-2xl bg-[#FBF9F6] border border-emerald-900/5 group hover:bg-[#F5F2ED] transition-colors">
+              <div
+                key={cls.id}
+                className="flex items-center gap-5 p-5 rounded-2xl bg-[#FBF9F6] border border-emerald-900/5 group hover:bg-[#F5F2ED] transition-colors"
+              >
                 <div className="w-12 h-12 rounded-xl bg-white border border-emerald-900/5 flex items-center justify-center text-emerald-900 shadow-sm group-hover:scale-110 transition-transform">
                   <Clock className="w-5 h-5" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-base font-bold text-[#1A2F23] truncate mb-1">{cls.subject}</p>
                   <div className="flex items-center gap-4 text-[10px] font-black text-emerald-900/40 uppercase tracking-tighter">
-                    <span className="flex items-center gap-1.5"><Clock className="w-3 h-3" /> {cls.time}</span>
-                    <span className="flex items-center gap-1.5"><MapPin className="w-3 h-3" /> {cls.room}</span>
+                    <span className="flex items-center gap-1.5">
+                      <Clock className="w-3 h-3" /> {cls.time}
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <MapPin className="w-3 h-3" /> {cls.room}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -235,16 +258,19 @@ function DashboardContent({ user, timetable, announcements, onNavigate }: any) {
           </div>
         </section>
 
-        {/* Announcements Card */}
+        {/* Recent Announcements */}
         <section className="bg-white rounded-3xl border border-emerald-900/5 p-8 shadow-sm">
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-[10px] font-black uppercase tracking-widest text-emerald-900/30">Recent Bulletins</h3>
-            <button onClick={() => onNavigate('announcements')} className="text-[10px] font-black uppercase tracking-widest text-emerald-900 hover:text-emerald-600 flex items-center gap-1 transition-colors">
+            <button
+              onClick={() => onNavigate('announcements')}
+              className="text-[10px] font-black uppercase tracking-widest text-emerald-900 hover:text-emerald-600 flex items-center gap-1 transition-colors"
+            >
               Read All <ChevronRight className="w-3 h-3" />
             </button>
           </div>
           <div className="space-y-4">
-            {announcements.slice(0, 3).map((ann: any) => (
+            {recentAnnouncements.map((ann: any) => (
               <div key={ann.id} className="p-5 rounded-2xl border border-emerald-900/5 bg-[#FBF9F6] hover:border-emerald-900/20 transition-all">
                 <div className="flex justify-between items-start mb-2">
                   <p className="text-sm font-bold text-[#1A2F23] truncate">{ann.title}</p>
@@ -260,6 +286,7 @@ function DashboardContent({ user, timetable, announcements, onNavigate }: any) {
   );
 }
 
+// --- Timetable ---
 function TimetableContent({ timetable }: { timetable: any[] }) {
   return (
     <div className="bg-white rounded-[2rem] border border-emerald-900/5 overflow-hidden animate-in fade-in duration-700 shadow-sm">
@@ -268,7 +295,9 @@ function TimetableContent({ timetable }: { timetable: any[] }) {
           <thead>
             <tr className="bg-[#F5F2ED] border-b border-emerald-900/5">
               {['Day', 'Time', 'Subject', 'Room', 'Instructor'].map((h) => (
-                <th key={h} className="p-6 text-[10px] font-black text-emerald-900/40 uppercase tracking-[0.2em]">{h}</th>
+                <th key={h} className="p-6 text-[10px] font-black text-emerald-900/40 uppercase tracking-[0.2em]">
+                  {h}
+                </th>
               ))}
             </tr>
           </thead>
@@ -289,13 +318,16 @@ function TimetableContent({ timetable }: { timetable: any[] }) {
   );
 }
 
+// --- Announcements ---
 function AnnouncementsContent({ announcements }: { announcements: any[] }) {
   return (
     <div className="grid gap-6 animate-in fade-in duration-700">
       {announcements.map((ann) => (
         <div key={ann.id} className="p-8 rounded-3xl border border-emerald-900/5 bg-white shadow-sm hover:-translate-y-1 transition-all duration-300">
           <div className="flex justify-between items-center mb-6">
-            <span className="px-3 py-1 rounded bg-emerald-900 text-white text-[9px] font-black uppercase tracking-[0.2em]">Bulletin</span>
+            <span className="px-3 py-1 rounded bg-emerald-900 text-white text-[9px] font-black uppercase tracking-[0.2em]">
+              Bulletin
+            </span>
             <span className="text-[10px] font-black text-emerald-900/20 uppercase tracking-widest">{ann.date}</span>
           </div>
           <h3 className="text-2xl font-serif font-bold text-[#1A2F23] mb-4">{ann.title}</h3>
@@ -310,6 +342,7 @@ function AnnouncementsContent({ announcements }: { announcements: any[] }) {
   );
 }
 
+// --- Resources ---
 function ResourcesContent({ resources }: { resources: any[] }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in duration-700">
@@ -319,10 +352,10 @@ function ResourcesContent({ resources }: { resources: any[] }) {
             <BookOpen className="w-6 h-6" />
           </div>
           <h3 className="text-lg font-serif font-bold text-[#1A2F23] mb-1">{res.title}</h3>
-          <p className="text-[10px] font-black text-emerald-900/30 uppercase tracking-widest mb-8">{res.subject}</p>
-          <button className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-white border border-emerald-900/10 text-emerald-900 text-[10px] font-black uppercase tracking-widest transition-all hover:bg-emerald-900 hover:text-white group-hover:border-emerald-900">
-            <Download className="w-4 h-4" /> Download
-          </button>
+          <p className="text-xs text-emerald-900/60 mb-4">{res.description}</p>
+          <Button variant="outline" size="sm" className="group-hover:bg-emerald-900 group-hover:text-white w-full flex items-center justify-center gap-2">
+            <Download className="w-3 h-3" /> Download
+          </Button>
         </div>
       ))}
     </div>

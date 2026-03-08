@@ -64,8 +64,10 @@ export function Navbar() {
                     <div className="w-8 h-8 rounded-full bg-emerald-900/10 flex items-center justify-center">
                       <User className="w-4 h-4 text-emerald-900" />
                     </div>
-                    {/* Increased from text-xs to text-sm */}
-                    <span className="text-sm font-bold text-[#1A2F23]">{user?.name.split(' ')[0]}</span>
+                    {/* Show first and last name with a space */}
+                    <span className="text-sm font-bold text-[#1A2F23]">
+                      {user ? user.name.split(' ').slice(0, 2).join(' ') : ''}
+                    </span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-64 p-2 rounded-2xl border-emerald-900/10 shadow-xl">

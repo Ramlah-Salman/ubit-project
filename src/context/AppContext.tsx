@@ -58,7 +58,8 @@ interface AppContextType {
   user: User | null;
   setUser: (user: User | null) => void;
   isAuthenticated: boolean;
-  login: (email: string, password: string, role: UserRole) => boolean;
+  login: (email: string, password: string, role: UserRole) => Promise<boolean>;
+  signup: (name: string, email: string, password: string, role: UserRole) => Promise<boolean>;
   logout: () => void;
   announcements: Announcement[];
   addAnnouncement: (announcement: Omit<Announcement, 'id' | 'date'>) => void;
@@ -193,6 +194,8 @@ const mockCourses: Course[] = [
   { id: '5', name: 'Software Design & Architecture', code: 'SE-302', semester: 3, field: 'SE' },
 ];
 
+const API_BASE_URL = 'http://localhost:5000/api';
+
 export function AppProvider({ children }: { children: ReactNode }) {
   const [selectedProgram, setSelectedProgram] = useState<Program>(null);
   const [selectedField, setSelectedField] = useState<Field>(null);
@@ -201,19 +204,81 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const isAuthenticated = user !== null;
 
-  const login = (email: string, password: string, role: UserRole): boolean => {
-    // Mock authentication
+  const login = async (
+    email: string,
+    password: string,
+    role: UserRole
+  ): Promise<boolean> => {
     if (email && password && role) {
-      const mockUser: User = {
-        id: '1',
-        name: role === 'student' ? 'Ali Hassan' : 'Dr. Fatima Noor',
-        email: email,
-        role: role,
-        field: selectedField || 'CS',
-        program: selectedProgram || 'morning',
-      };
-      setUser(mockUser);
-      return true;
+      try {
+        const response = await fetch(`${API_BASE_URL}/auth/login`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email, password }),
+        });
+
+        if (!response.ok) {
+          return false;
+        }
+
+        const data = await response.json();
+
+        const appUser: User = {
+          id: data.user._id,
+          name: data.user.name,
+          email: data.user.email,
+          role: data.user.role as UserRole,
+          field: selectedField || 'CS',
+          program: selectedProgram || 'morning',
+        };
+
+        setUser(appUser);
+        return true;
+      } catch {
+        return false;
+      }
+    }
+    return false;
+  };
+
+  const signup = async (
+    name: string,
+    email: string,
+    password: string,
+    role: UserRole
+  ): Promise<boolean> => {
+    if (name && email && password && role) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/auth/signup`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ name, email, password, role }),
+        });
+
+        if (!response.ok) {
+          return false;
+        }
+
+        const data = await response.json();
+
+        const appUser: User = {
+          id: data.user._id,
+          name: data.user.name,
+          email: data.user.email,
+          role: data.user.role as UserRole,
+          field: selectedField || 'CS',
+          program: selectedProgram || 'morning',
+        };
+
+        setUser(appUser);
+        return true;
+      } catch {
+        return false;
+      }
     }
     return false;
   };
@@ -242,6 +307,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setUser,
         isAuthenticated,
         login,
+        signup,
         logout,
         announcements,
         addAnnouncement,
