@@ -7,6 +7,7 @@ import { AppProvider } from "@/context/AppContext";
 import Index from "./pages/Index";
 import Programs from "./pages/Programs";
 import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 import StudentDashboard from "./pages/StudentDashboard";
 import FacultyDashboard from "./pages/FacultyDashboard";
 import Announcements from "./pages/Announcements";
@@ -26,6 +27,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/programs" element={<Programs />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
             <Route path="/student-dashboard" element={<StudentDashboard />} />
             <Route path="/faculty-dashboard" element={<FacultyDashboard />} />
             <Route path="/announcements" element={<Announcements />} />

@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'; // Added useEffect
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { GraduationCap, Briefcase, Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { useApp, UserRole } from '@/context/AppContext';
 import { MainLayout } from '@/components/layout/MainLayout';
@@ -17,7 +17,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // FIX: Force scroll to top on component mount
+  // Scroll to top on mount
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -60,10 +60,10 @@ export default function Login() {
 
     setIsLoading(true);
 
-    // Simulate login delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    // Optional: small UI delay
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
-    const success = login(email, password, selectedRole);
+    const success = await login(email, password, selectedRole);
 
     if (success) {
       toast({
@@ -72,12 +72,16 @@ export default function Login() {
       });
 
       setTimeout(() => {
-        navigate(selectedRole === 'student' ? '/student-dashboard' : '/faculty-dashboard');
+        navigate(
+          selectedRole === 'student'
+            ? '/student-dashboard'
+            : '/faculty-dashboard'
+        );
       }, 500);
     } else {
       toast({
         title: 'Login failed',
-        description: 'Invalid credentials. Please try again.',
+        description: 'Invalid credentials or server error. Please try again.',
         variant: 'destructive',
       });
     }
@@ -87,10 +91,6 @@ export default function Login() {
 
   return (
     <MainLayout>
-      {/* Changed min-h to ensure it occupies the full viewport 
-         minus common header height, and added items-start with pt-20
-         to ensure it's not "stuck" to the footer on tall screens.
-      */}
       <div className="min-h-screen flex items-start justify-center pt-20 pb-12 px-4 bg-background">
         <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom-4 duration-700">
           {/* Header */}
@@ -106,7 +106,7 @@ export default function Login() {
               <div className="flex justify-center gap-2 mt-4">
                 {selectedProgram && (
                   <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${selectedProgram === 'morning' ? 'bg-orange-100 text-orange-700' : 'bg-indigo-100 text-indigo-700'}`}>
-                    {selectedProgram}
+                    {selectedProgram.charAt(0).toUpperCase() + selectedProgram.slice(1)}
                   </span>
                 )}
                 {selectedField && (
@@ -209,6 +209,13 @@ export default function Login() {
 
           <p className="text-center text-[11px] font-medium text-muted-foreground mt-8 uppercase tracking-[0.2em]">
             Authorized Access Only
+          </p>
+
+          <p className="text-center text-sm text-muted-foreground mt-4">
+            Don't have an account?{" "}
+            <Link to="/signup" className="text-accent hover:underline">
+              Create one
+            </Link>
           </p>
         </div>
       </div>
