@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { GraduationCap, Briefcase, Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { useApp, UserRole } from '@/context/AppContext';
@@ -16,6 +16,11 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const roles = [
     {
@@ -55,6 +60,9 @@ export default function Login() {
 
     setIsLoading(true);
 
+    // Optional: small UI delay
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
     const success = await login(email, password, selectedRole);
 
     if (success) {
@@ -64,7 +72,11 @@ export default function Login() {
       });
 
       setTimeout(() => {
-        navigate(selectedRole === 'student' ? '/student-dashboard' : '/faculty-dashboard');
+        navigate(
+          selectedRole === 'student'
+            ? '/student-dashboard'
+            : '/faculty-dashboard'
+        );
       }, 500);
     } else {
       toast({
@@ -79,26 +91,26 @@ export default function Login() {
 
   return (
     <MainLayout>
-      <div className="min-h-[calc(100vh-64px)] flex items-center justify-center py-12 px-4">
-        <div className="w-full max-w-md">
+      <div className="min-h-screen flex items-start justify-center pt-20 pb-12 px-4 bg-background">
+        <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom-4 duration-700">
           {/* Header */}
-          <div className="text-center mb-8 animate-fade-up">
-            <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center mx-auto mb-4">
-              <span className="text-primary-foreground font-serif font-bold text-2xl">U</span>
+          <div className="text-center mb-8">
+            <div className="w-16 h-16 rounded-2xl bg-sidebar-primary flex items-center justify-center mx-auto mb-4 shadow-lg shadow-primary/20">
+              <span className="text-sidebar-primary-foreground font-serif font-bold text-2xl">U</span>
             </div>
             <h1 className="text-3xl font-serif font-bold text-foreground mb-2">Welcome Back</h1>
-            <p className="text-muted-foreground">Sign in to access the UBIT Portal</p>
+            <p className="text-sm text-muted-foreground">Sign in to access the UBIT Portal</p>
 
             {/* Show selected program/field */}
             {(selectedProgram || selectedField) && (
               <div className="flex justify-center gap-2 mt-4">
                 {selectedProgram && (
-                  <span className={`badge-program ${selectedProgram === 'morning' ? 'badge-morning' : 'badge-evening'}`}>
+                  <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${selectedProgram === 'morning' ? 'bg-orange-100 text-orange-700' : 'bg-indigo-100 text-indigo-700'}`}>
                     {selectedProgram.charAt(0).toUpperCase() + selectedProgram.slice(1)}
                   </span>
                 )}
                 {selectedField && (
-                  <span className={`badge-program ${selectedField === 'CS' ? 'badge-cs' : 'badge-se'}`}>
+                  <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${selectedField === 'CS' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'}`}>
                     {selectedField}
                   </span>
                 )}
@@ -107,8 +119,8 @@ export default function Login() {
           </div>
 
           {/* Role Selection */}
-          <div className="mb-6 animate-fade-up animation-delay-100">
-            <label className="block text-sm font-medium text-foreground mb-3">I am a</label>
+          <div className="mb-8">
+            <label className="block text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4 text-center">I am a</label>
             <div className="grid grid-cols-2 gap-4">
               {roles.map((role) => {
                 const isSelected = selectedRole === role.id;
@@ -119,15 +131,15 @@ export default function Login() {
                     key={role.id}
                     type="button"
                     onClick={() => setSelectedRole(role.id as UserRole)}
-                    className={`p-4 rounded-xl border-2 transition-all duration-200 text-left ${
+                    className={`p-4 rounded-2xl border-2 transition-all duration-300 text-left group ${
                       isSelected
-                        ? 'border-accent bg-accent/5'
-                        : 'border-border bg-card hover:border-accent/50'
+                        ? 'border-sidebar-primary bg-sidebar-primary/5 ring-4 ring-sidebar-primary/10'
+                        : 'border-border bg-card hover:border-sidebar-primary/50'
                     }`}
                   >
-                    <Icon className={`w-6 h-6 mb-2 ${isSelected ? 'text-accent' : 'text-muted-foreground'}`} />
-                    <p className="font-medium text-foreground">{role.title}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{role.description}</p>
+                    <Icon className={`w-6 h-6 mb-3 transition-transform group-hover:scale-110 ${isSelected ? 'text-sidebar-primary' : 'text-muted-foreground'}`} />
+                    <p className="font-bold text-foreground text-sm">{role.title}</p>
+                    <p className="text-[12px] text-muted-foreground mt-1 leading-tight">{role.description}</p>
                   </button>
                 );
               })}
@@ -135,60 +147,57 @@ export default function Login() {
           </div>
 
           {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-4 animate-fade-up animation-delay-200">
-            {/* Email */}
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
-                Email Address
+              <label htmlFor="email" className="block text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2 ml-1">
+                University Email
               </label>
-              <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <div className="relative group">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-sidebar-primary transition-colors" />
                 <input
                   id="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="your.email@uok.edu.pk"
-                  className="input-academic pl-12"
+                  placeholder="name@uok.edu.pk"
+                  className="w-full h-12 pl-12 pr-4 rounded-xl border border-border bg-secondary/20 focus:bg-background focus:ring-2 ring-sidebar-primary/20 outline-none transition-all placeholder:text-muted-foreground/50"
                 />
               </div>
             </div>
 
-            {/* Password */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-foreground mb-2">
+              <label htmlFor="password" className="block text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2 ml-1">
                 Password
               </label>
-              <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <div className="relative group">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-sidebar-primary transition-colors" />
                 <input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
-                  className="input-academic pl-12 pr-12"
+                  placeholder="••••••••"
+                  className="w-full h-12 pl-12 pr-12 rounded-xl border border-border bg-secondary/20 focus:bg-background focus:ring-2 ring-sidebar-primary/20 outline-none transition-all"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-sidebar-primary transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
             </div>
 
-            {/* Submit */}
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full btn-accent-academic"
+              className="w-full h-12 rounded-xl bg-sidebar-primary text-sidebar-primary-foreground font-bold shadow-lg shadow-primary/20 hover:opacity-90 transition-opacity mt-2"
             >
               {isLoading ? (
                 <span className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-accent-foreground/30 border-t-accent-foreground rounded-full animate-spin" />
-                  Signing in...
+                  <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                  Authenticating...
                 </span>
               ) : (
                 <span className="flex items-center gap-2">
@@ -198,11 +207,14 @@ export default function Login() {
             </Button>
           </form>
 
-          {/* Demo hint */}
-          <p className="text-center text-sm text-muted-foreground mt-6 animate-fade-up animation-delay-300">
-            Use your registered email and password to sign in.{" "}
+          <p className="text-center text-[11px] font-medium text-muted-foreground mt-8 uppercase tracking-[0.2em]">
+            Authorized Access Only
+          </p>
+
+          <p className="text-center text-sm text-muted-foreground mt-4">
+            Don't have an account?{" "}
             <Link to="/signup" className="text-accent hover:underline">
-              Create an account
+              Create one
             </Link>
           </p>
         </div>
