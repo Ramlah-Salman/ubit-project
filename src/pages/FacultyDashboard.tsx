@@ -199,7 +199,7 @@ export default function FacultyDashboard() {
               {/* Welcome Card */}
               <div className="card-academic">
                 <h2 className="text-2xl font-serif font-semibold text-foreground mb-2">
-                  Good Day, {user.name.split(' ').pop()}! 👋
+                  Good Day, {user.name}! 👋
                 </h2>
                 <p className="text-muted-foreground">
                   Manage your courses, upload materials, and post announcements.

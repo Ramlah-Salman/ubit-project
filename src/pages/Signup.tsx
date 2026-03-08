@@ -1,19 +1,21 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { GraduationCap, Briefcase, Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
+import { GraduationCap, Briefcase, Mail, Lock, User, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { useApp, UserRole } from '@/context/AppContext';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 
-export default function Login() {
+export default function Signup() {
   const navigate = useNavigate();
-  const { login, selectedProgram, selectedField } = useApp();
+  const { signup, selectedProgram, selectedField } = useApp();
   const { toast } = useToast();
 
   const [selectedRole, setSelectedRole] = useState<UserRole>(null);
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -22,13 +24,13 @@ export default function Login() {
       id: 'student',
       title: 'Student',
       icon: GraduationCap,
-      description: 'Access your courses, timetable, and resources',
+      description: 'Create a student account to access your portal',
     },
     {
       id: 'faculty',
       title: 'Faculty',
       icon: Briefcase,
-      description: 'Manage courses, upload materials, post announcements',
+      description: 'Create a faculty account to manage courses',
     },
   ];
 
@@ -44,10 +46,28 @@ export default function Login() {
       return;
     }
 
-    if (!email || !password) {
+    if (!name || !email || !password || !confirmPassword) {
       toast({
-        title: 'Missing credentials',
-        description: 'Please enter your email and password.',
+        title: 'Missing fields',
+        description: 'Please fill in all required fields.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      toast({
+        title: 'Passwords do not match',
+        description: 'Please make sure both passwords are the same.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (password.length < 6) {
+      toast({
+        title: 'Weak password',
+        description: 'Password must be at least 6 characters long.',
         variant: 'destructive',
       });
       return;
@@ -55,12 +75,12 @@ export default function Login() {
 
     setIsLoading(true);
 
-    const success = await login(email, password, selectedRole);
+    const success = await signup(name, email, password, selectedRole);
 
     if (success) {
       toast({
-        title: 'Login successful',
-        description: `Welcome back! Redirecting to your ${selectedRole} dashboard.`,
+        title: 'Account created',
+        description: `Welcome to UBIT Portal! Redirecting to your ${selectedRole} dashboard.`,
       });
 
       setTimeout(() => {
@@ -68,8 +88,8 @@ export default function Login() {
       }, 500);
     } else {
       toast({
-        title: 'Login failed',
-        description: 'Invalid credentials or server error. Please try again.',
+        title: 'Signup failed',
+        description: 'User may already exist or there was a server error.',
         variant: 'destructive',
       });
     }
@@ -86,8 +106,8 @@ export default function Login() {
             <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center mx-auto mb-4">
               <span className="text-primary-foreground font-serif font-bold text-2xl">U</span>
             </div>
-            <h1 className="text-3xl font-serif font-bold text-foreground mb-2">Welcome Back</h1>
-            <p className="text-muted-foreground">Sign in to access the UBIT Portal</p>
+            <h1 className="text-3xl font-serif font-bold text-foreground mb-2">Create your account</h1>
+            <p className="text-muted-foreground">Sign up to access the UBIT Portal</p>
 
             {/* Show selected program/field */}
             {(selectedProgram || selectedField) && (
@@ -134,8 +154,26 @@ export default function Login() {
             </div>
           </div>
 
-          {/* Login Form */}
+          {/* Signup Form */}
           <form onSubmit={handleSubmit} className="space-y-4 animate-fade-up animation-delay-200">
+            {/* Name */}
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-foreground mb-2">
+                Full Name
+              </label>
+              <div className="relative">
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                <input
+                  id="name"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Your full name"
+                  className="input-academic pl-12"
+                />
+              </div>
+            </div>
+
             {/* Email */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
@@ -166,7 +204,7 @@ export default function Login() {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
+                  placeholder="Create a password"
                   className="input-academic pl-12 pr-12"
                 />
                 <button
@@ -179,6 +217,24 @@ export default function Login() {
               </div>
             </div>
 
+            {/* Confirm Password */}
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-foreground mb-2">
+                Confirm Password
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                <input
+                  id="confirmPassword"
+                  type={showPassword ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Re-enter your password"
+                  className="input-academic pl-12 pr-12"
+                />
+              </div>
+            </div>
+
             {/* Submit */}
             <Button
               type="submit"
@@ -188,21 +244,20 @@ export default function Login() {
               {isLoading ? (
                 <span className="flex items-center gap-2">
                   <div className="w-4 h-4 border-2 border-accent-foreground/30 border-t-accent-foreground rounded-full animate-spin" />
-                  Signing in...
+                  Creating account...
                 </span>
               ) : (
                 <span className="flex items-center gap-2">
-                  Sign In <ArrowRight className="w-4 h-4" />
+                  Sign Up <ArrowRight className="w-4 h-4" />
                 </span>
               )}
             </Button>
           </form>
 
-          {/* Demo hint */}
           <p className="text-center text-sm text-muted-foreground mt-6 animate-fade-up animation-delay-300">
-            Use your registered email and password to sign in.{" "}
-            <Link to="/signup" className="text-accent hover:underline">
-              Create an account
+            Already have an account?{' '}
+            <Link to="/login" className="text-accent hover:underline">
+              Sign in
             </Link>
           </p>
         </div>
@@ -210,3 +265,4 @@ export default function Login() {
     </MainLayout>
   );
 }
+

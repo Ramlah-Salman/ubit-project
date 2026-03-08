@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 
 export type Program = 'morning' | 'evening' | null;
 export type Field = 'CS' | 'SE' | null;
@@ -55,10 +55,12 @@ interface AppContextType {
   setSelectedProgram: (program: Program) => void;
   selectedField: Field;
   setSelectedField: (field: Field) => void;
+  token: string | null;
   user: User | null;
   setUser: (user: User | null) => void;
   isAuthenticated: boolean;
-  login: (email: string, password: string, role: UserRole) => boolean;
+  login: (email: string, password: string, role: UserRole) => Promise<boolean>;
+  signup: (name: string, email: string, password: string, role: UserRole) => Promise<boolean>;
   logout: () => void;
   announcements: Announcement[];
   addAnnouncement: (announcement: Omit<Announcement, 'id' | 'date'>) => void;
@@ -68,6 +70,9 @@ interface AppContextType {
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+const AUTH_TOKEN_KEY = 'ubit_auth_token';
 
 // Mock data
 const mockAnnouncements: Announcement[] = [
@@ -196,31 +201,156 @@ const mockCourses: Course[] = [
 export function AppProvider({ children }: { children: ReactNode }) {
   const [selectedProgram, setSelectedProgram] = useState<Program>(null);
   const [selectedField, setSelectedField] = useState<Field>(null);
+  const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [announcements, setAnnouncements] = useState<Announcement[]>(mockAnnouncements);
 
-  const isAuthenticated = user !== null;
+  const isAuthenticated = !!user && !!token;
 
-  const login = (email: string, password: string, role: UserRole): boolean => {
-    // Mock authentication
-    if (email && password && role) {
-      const mockUser: User = {
-        id: '1',
-        name: role === 'student' ? 'Ali Hassan' : 'Dr. Fatima Noor',
-        email: email,
-        role: role,
-        field: selectedField || 'CS',
-        program: selectedProgram || 'morning',
-      };
-      setUser(mockUser);
+  const saveAuth = (jwtToken: string, apiUser: { _id: string; name: string; email: string; role: string }, roleOverride?: UserRole) => {
+    localStorage.setItem(AUTH_TOKEN_KEY, jwtToken);
+    setToken(jwtToken);
+
+    const resolvedRole: UserRole =
+      (apiUser.role === 'student' || apiUser.role === 'faculty' ? apiUser.role : null) ||
+      roleOverride ||
+      null;
+
+    const appUser: User = {
+      id: apiUser._id,
+      name: apiUser.name,
+      email: apiUser.email,
+      role: resolvedRole,
+      field: selectedField || 'CS',
+      program: selectedProgram || 'morning',
+    };
+
+    setUser(appUser);
+  };
+
+  const login = async (email: string, password: string, role: UserRole): Promise<boolean> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        // eslint-disable-next-line no-console
+        console.error('Login failed:', data);
+        return false;
+      }
+
+      if (!data.token || !data.user) {
+        // eslint-disable-next-line no-console
+        console.error('Login response missing token or user');
+        return false;
+      }
+
+      saveAuth(data.token, data.user, role);
       return true;
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Login error:', error);
+      return false;
     }
-    return false;
+  };
+
+  const signup = async (name: string, email: string, password: string, role: UserRole): Promise<boolean> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/signup`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name, email, password, role }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        // eslint-disable-next-line no-console
+        console.error('Signup failed:', data);
+        return false;
+      }
+
+      if (!data.token || !data.user) {
+        // eslint-disable-next-line no-console
+        console.error('Signup response missing token or user');
+        return false;
+      }
+
+      saveAuth(data.token, data.user, role);
+      return true;
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Signup error:', error);
+      return false;
+    }
   };
 
   const logout = () => {
+    localStorage.removeItem(AUTH_TOKEN_KEY);
+    setToken(null);
     setUser(null);
   };
+
+  // Restore auth from localStorage on first load
+  useEffect(() => {
+    const storedToken = localStorage.getItem(AUTH_TOKEN_KEY);
+    if (!storedToken) return;
+
+    const fetchCurrentUser = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
+          headers: {
+            Authorization: `Bearer ${storedToken}`,
+          },
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.user) {
+          localStorage.removeItem(AUTH_TOKEN_KEY);
+          setToken(null);
+          setUser(null);
+          return;
+        }
+
+        setToken(storedToken);
+
+        const apiUser = data.user;
+        const resolvedRole: UserRole =
+          apiUser.role === 'student' || apiUser.role === 'faculty' ? apiUser.role : null;
+
+        const restoredUser: User = {
+          id: apiUser._id,
+          name: apiUser.name,
+          email: apiUser.email,
+          role: resolvedRole,
+          field: selectedField || 'CS',
+          program: selectedProgram || 'morning',
+        };
+
+        setUser(restoredUser);
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Error loading current user:', error);
+        localStorage.removeItem(AUTH_TOKEN_KEY);
+        setToken(null);
+        setUser(null);
+      }
+    };
+
+    fetchCurrentUser();
+    // We intentionally want this to run only once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const addAnnouncement = (announcement: Omit<Announcement, 'id' | 'date'>) => {
     const newAnnouncement: Announcement = {
@@ -238,10 +368,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setSelectedProgram,
         selectedField,
         setSelectedField,
+        token,
         user,
         setUser,
         isAuthenticated,
         login,
+        signup,
         logout,
         announcements,
         addAnnouncement,

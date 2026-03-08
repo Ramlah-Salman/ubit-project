@@ -190,7 +190,7 @@ function DashboardContent({
       {/* Welcome Card */}
       <div className="card-academic">
         <h2 className="text-2xl font-serif font-semibold text-foreground mb-2">
-          Good Morning, {user.name.split(' ')[0]}! 👋
+          Good Morning, {user.name}! 👋
         </h2>
         <p className="text-muted-foreground">
           Here's an overview of your academic activities for today.
