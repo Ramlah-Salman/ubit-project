@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { BookOpen, Filter, FileText, ClipboardList, ScrollText, Download } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { Button } from '@/components/ui/button';
 
 export default function Resources() {
   const { resources } = useApp();
@@ -29,84 +28,84 @@ export default function Resources() {
     'past-paper': 'Past Paper',
   };
 
+  // Modernized color palette for resource types
   const typeColors = {
-    notes: 'bg-accent/10 text-accent',
-    assignment: 'bg-primary/10 text-primary',
-    'past-paper': 'bg-orange-500/10 text-orange-600',
+    notes: 'text-emerald-600 bg-emerald-50 border-emerald-100',
+    assignment: 'text-amber-600 bg-amber-50 border-amber-100',
+    'past-paper': 'text-indigo-600 bg-indigo-50 border-indigo-100',
   };
 
   return (
     <MainLayout>
-      {/* Header */}
-      <section className="py-12 bg-gradient-to-b from-secondary/50 to-background">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center">
-              <BookOpen className="w-7 h-7 text-accent" />
-            </div>
-            <div>
-              <h1 className="section-title mb-1">Resources</h1>
-              <p className="text-muted-foreground">Access lecture notes, assignments, and past papers</p>
-            </div>
+      {/* Header - Consistent with Programs/Announcements */}
+      <section className="py-20 bg-[#F5F2ED] border-b border-emerald-900/5">
+        <div className="container mx-auto px-4 text-center">
+          <div className="inline-block px-3 py-1 mb-4 text-[10px] uppercase tracking-[0.3em] font-bold text-emerald-800 bg-emerald-100/50 rounded-sm">
+            Digital Archive
           </div>
+          <h1 className="text-4xl md:text-5xl font-serif font-bold text-[#1A2F23] mb-4">Resources</h1>
+          <p className="text-muted-foreground max-w-xl mx-auto">
+            Access the central repository for lecture material and past assessments
+          </p>
         </div>
       </section>
 
-      {/* Filters */}
-      <section className="py-6 border-b border-border sticky top-16 bg-background/95 backdrop-blur-sm z-20">
+      {/* Modern Pill Filters - Sticky */}
+      <section className="py-6 bg-white border-b border-emerald-900/5 sticky top-[72px] z-20 backdrop-blur-md bg-white/90">
         <div className="container mx-auto px-4">
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Filter className="w-4 h-4" />
-              Filter:
-            </div>
-
-            {/* Type Filter */}
-            <div className="flex flex-wrap items-center gap-2">
+          <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-center gap-4">
+            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-900/30 flex items-center gap-2 mr-2">
+              <Filter className="w-3 h-3" /> Filter Archive
+            </span>
+            
+            {/* Type Filter Group */}
+            <div className="flex bg-[#F5F2ED] p-1 rounded-full border border-emerald-900/5 overflow-x-auto no-scrollbar">
               {(['all', 'notes', 'assignment', 'past-paper'] as const).map((type) => (
-                <Button
+                <button
                   key={type}
-                  variant={typeFilter === type ? 'default' : 'outline'}
-                  size="sm"
                   onClick={() => setTypeFilter(type)}
-                  className={typeFilter === type ? '' : 'bg-transparent'}
+                  className={`px-4 py-1.5 rounded-full text-[10px] font-bold whitespace-nowrap transition-all duration-300 ${
+                    typeFilter === type 
+                    ? 'bg-white text-emerald-900 shadow-sm' 
+                    : 'text-emerald-900/40 hover:text-emerald-900'
+                  }`}
                 >
                   {type === 'all' ? 'All Types' : typeLabels[type as keyof typeof typeLabels]}
-                </Button>
+                </button>
               ))}
             </div>
 
-            <div className="h-6 w-px bg-border hidden md:block" />
-
-            {/* Field Filter */}
-            <div className="flex items-center gap-2">
+            {/* Field Filter Group */}
+            <div className="flex bg-[#F5F2ED] p-1 rounded-full border border-emerald-900/5">
               {(['all', 'CS', 'SE'] as const).map((field) => (
-                <Button
+                <button
                   key={field}
-                  variant={fieldFilter === field ? 'default' : 'outline'}
-                  size="sm"
                   onClick={() => setFieldFilter(field)}
-                  className={fieldFilter === field ? '' : 'bg-transparent'}
+                  className={`px-4 py-1.5 rounded-full text-[10px] font-bold transition-all duration-300 ${
+                    fieldFilter === field 
+                    ? 'bg-white text-emerald-900 shadow-sm' 
+                    : 'text-emerald-900/40 hover:text-emerald-900'
+                  }`}
                 >
                   {field === 'all' ? 'All Fields' : field}
-                </Button>
+                </button>
               ))}
             </div>
 
-            <div className="h-6 w-px bg-border hidden md:block" />
-
-            {/* Program Filter */}
-            <div className="flex items-center gap-2">
+            {/* Program Filter Group */}
+            <div className="flex bg-[#F5F2ED] p-1 rounded-full border border-emerald-900/5">
               {(['all', 'morning', 'evening'] as const).map((program) => (
-                <Button
+                <button
                   key={program}
-                  variant={programFilter === program ? 'default' : 'outline'}
-                  size="sm"
                   onClick={() => setProgramFilter(program)}
-                  className={programFilter === program ? '' : 'bg-transparent'}
+                  className={`px-4 py-1.5 rounded-full text-[10px] font-bold transition-all duration-300 ${
+                    programFilter === program 
+                    ? 'bg-white text-emerald-900 shadow-sm' 
+                    : 'text-emerald-900/40 hover:text-emerald-900'
+                  }`}
                 >
-                  {program === 'all' ? 'All Programs' : program.charAt(0).toUpperCase() + program.slice(1)}
-                </Button>
+                  {program === 'all' ? 'All' : program.charAt(0).toUpperCase() + program.slice(1)}
+                </button>
               ))}
             </div>
           </div>
@@ -114,60 +113,67 @@ export default function Resources() {
       </section>
 
       {/* Resources Grid */}
-      <section className="py-12">
+      <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           {filteredResources.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
               {filteredResources.map((res, index) => {
                 const Icon = typeIcons[res.type as keyof typeof typeIcons];
-                const colorClass = typeColors[res.type as keyof typeof typeColors];
+                const typeStyle = typeColors[res.type as keyof typeof typeColors];
 
                 return (
                   <div
                     key={res.id}
-                    className="card-academic card-hover animate-fade-up"
+                    className="group relative p-8 rounded-3xl border border-emerald-900/5 bg-[#FBF9F6] transition-all duration-500 hover:shadow-xl hover:shadow-emerald-900/5 hover:-translate-y-1 overflow-hidden"
                     style={{ animationDelay: `${index * 50}ms` }}
                   >
-                    <div className="flex items-start justify-between mb-4">
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${colorClass}`}>
-                        <Icon className="w-6 h-6" />
+                    <div className="flex items-start justify-between mb-6">
+                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border transition-colors duration-500 ${typeStyle}`}>
+                        <Icon className="w-5 h-5" />
                       </div>
                       <div className="flex gap-2">
                         {res.program && (
-                          <span className={`badge-program ${res.program === 'morning' ? 'badge-morning' : 'badge-evening'}`}>
-                            {res.program.charAt(0).toUpperCase() + res.program.slice(1)}
+                          <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-tighter ${
+                            res.program === 'morning' ? 'bg-amber-100 text-amber-700' : 'bg-indigo-100 text-indigo-700'
+                          }`}>
+                            {res.program}
                           </span>
                         )}
                         {res.field && (
-                          <span className={`badge-program ${res.field === 'CS' ? 'badge-cs' : 'badge-se'}`}>
+                          <span className="px-2 py-0.5 rounded bg-emerald-900 text-white text-[9px] font-black uppercase tracking-tighter">
                             {res.field}
                           </span>
                         )}
                       </div>
                     </div>
 
-                    <span className={`inline-block px-2 py-1 rounded-md text-xs font-medium mb-3 ${colorClass}`}>
-                      {typeLabels[res.type as keyof typeof typeLabels]}
-                    </span>
+                    <div className="mb-4">
+                      <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest mb-3 ${typeStyle}`}>
+                        {typeLabels[res.type as keyof typeof typeLabels]}
+                      </span>
+                      <h3 className="font-serif font-bold text-xl text-[#1A2F23] mb-2 group-hover:text-emerald-700 transition-colors">
+                        {res.title}
+                      </h3>
+                      <p className="text-sm text-muted-foreground font-medium">{res.subject}</p>
+                    </div>
 
-                    <h3 className="font-serif font-semibold text-lg text-foreground mb-2">{res.title}</h3>
-                    <p className="text-sm text-muted-foreground mb-6">{res.subject}</p>
-
-                    <Button variant="outline" className="w-full group">
-                      <Download className="w-4 h-4 mr-2 group-hover:animate-bounce" />
-                      Download
-                    </Button>
+                    <button className="w-full mt-4 flex items-center justify-center gap-2 py-3 rounded-xl bg-white border border-emerald-900/10 text-emerald-900 text-xs font-bold transition-all duration-300 hover:bg-emerald-900 hover:text-white hover:border-emerald-900 shadow-sm">
+                      <Download className="w-4 h-4 group-hover:animate-bounce" />
+                      Download Resource
+                    </button>
                   </div>
                 );
               })}
             </div>
           ) : (
-            <div className="text-center py-16">
-              <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mx-auto mb-4">
-                <BookOpen className="w-8 h-8 text-muted-foreground" />
+            <div className="text-center py-24 max-w-md mx-auto">
+              <div className="w-16 h-16 rounded-3xl bg-[#F5F2ED] flex items-center justify-center mx-auto mb-6">
+                <BookOpen className="w-8 h-8 text-emerald-900/20" />
               </div>
-              <h3 className="font-serif font-semibold text-lg text-foreground mb-2">No resources found</h3>
-              <p className="text-muted-foreground">Try adjusting your filters to see more results.</p>
+              <h3 className="text-xl font-serif font-bold text-[#1A2F23] mb-2">No materials found</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                We couldn't find any resources matching your current filter selection.
+              </p>
             </div>
           )}
         </div>
